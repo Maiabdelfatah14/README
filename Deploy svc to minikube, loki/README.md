@@ -18,23 +18,12 @@ Make sure this is okay :-
 	3- process 3
 
 
-
-### 1. Virtualization Support
+## 1. install docker 
 ```bash
-  egrep -q 'vmx|svm' /proc/cpuinfo && echo "Virtualization supported" || echo "No virtualization support"         
-```
-
-
-## 2. Install KVM and libvirt
-```bash
-sudo dnf install -y qemu-kvm libvirt virt-install bridge-utils
-sudo systemctl enable --now libvirtd
-```
-
-## 3. Add user to libvirt group
-```bash
-sudo usermod -aG libvirt $(whoami)
-newgrp libvirt
+sudo dnf install docker-ce docker-ce-cli containerd.io -y
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+systemctl status docker
 ```
 
 ## 4. Install minikube
@@ -51,6 +40,7 @@ sudo mv kubectl /usr/local/bin/
 ```
 
 ## 6. Start minikube 
+Start  Minikube cluster using the Docker driver 
 ```bash
 minikube start --driver=docker
 minikube status
@@ -60,9 +50,8 @@ kubectl get nodes
 ![image](https://github.com/user-attachments/assets/fb9b5a97-7824-4295-8066-f087bf0a7784)
 
 
-
-
 ## B) Create app and service Nodeport
+Create a sample application deployment and expose it as a NodePort service
 ```bash
 minikube start
 kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
@@ -85,46 +74,103 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
->>  Repo 
+
+## 1) Add Loki for Log Aggregation & Grafana
+Add Grafana Helm Repository
+```bash
+ helm repo add grafana https://grafana.github.io/helm-charts
+ helm repo update
+ helm install grafana grafana/grafana -n default
+```
+
+Install Loki Stack
+```bash
+helm show values grafana/loki-stack > loki-stack-values.yaml
+Nano loki-stack-values.yaml
+(enable : false )   (3lshan pod loki-stack-grafana not install 3shan hy7sal error beacouse i install grafana pod)
+helm install loki-stack grafana/loki-stack 
+```
+
+Verify Installation and Access Loki/Grafana
+```bash
+kubectl port-forward pod/grafana-59b6644864-rgw8c 3000:3000                     
+kubectl port-forward svc/loki-stack 3100:3100  
+```
+Then to access the Grafana dashboard in browser 
+>>  http://localhost:3000
+
+in grafana
+```bash
+1- Name : admin
+2- Passwd:
+kubectl get secret loki-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode           (loki)
+```
+
+in grafana >> explore 
+![image](https://github.com/user-attachments/assets/13111064-8df8-442b-a5ee-397a1e950c4e)
+![image](https://github.com/user-attachments/assets/acce8851-e53e-4e7e-bd7c-2ae1b830ab5f)
+
+
+## To connect from pod grafana to loki in terminal 
+```bash
+kubectl exec -it   grafana-59b6644864-rgw8c  -- /bin/bash
+curl -v http://loki-stack.default:3100/ready
+```
+![image](https://github.com/user-attachments/assets/5ef358f3-94ac-46cf-8c1d-8bdad34b25cd)
+
+
+##  2) Install Grafana and Prometheus  ( If you need )
+
+Install Grafana and Prometheus using Helm charts for monitoring my cluster.
+A) Add Helm Repository
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 ```
 
->> Insatll Prometheus + Grafana Stack
+B) Install Prometheus + Grafana Stack  ( Metrices ) 
 ```bash
 helm install prometheus-stack prometheus-community/kube-prometheus-stack
-kubectl get pods   ( all running) 
-```
-## if you want in namespace 
-```bash
-helm install prom-stack prometheus-community/kube-prometheus-stack \
-  --namespace monitoring --create-namespace
+kubectl get pods                 ( If all pods are running ) 
+
+kubectl port-forward pod/prometheus-stack-grafana-56d84b4f48-dwthm 3000:3000                                                   
+kubectl port-forward pod/prometheus-prometheus-stack-kube-prom-prometheus-0 9090:9090                            
 ```
 
 
-## Forwarding to Grafana "Port forward"
-```bash
-kubectl port-forward svc/prom-stack-grafana 3000:80 -n monitoring
-```
-## In any web browers  firefox & 
-```bash
-   http://localhost:3000
-```
+Then to access the Grafana dashboard in browser 
+>>  http://localhost:3000
 
-## D) in grafana 
+c) in grafana
+```bash
 1- Name : admin
 2- Passwd:
-```bash
 kubectl get secret prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode    (prometheus)
-kubectl get secret loki-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode           (loki)
+```
+![image](https://github.com/user-attachments/assets/79f3d98c-7162-419e-8621-d6fa078caf4f)
+![image](https://github.com/user-attachments/assets/6953f04a-2e5f-409a-8331-cb4c92692fa5)
+
+
+## Uninstall Helm Releases
+1) Uninstall loki-stack:
+```bash
+helm uninstall loki-stack
+helm list -A # Lists all Helm releases ( grafana, prometheus ) in all namespaces
+helm uninstall grafana
+helm uninstall prometheus
+```
+2) Remove Helm Repositories
+```bash
+helm repo remove grafana
+helm repo remove prometana # If you added a separate Prometheus repo
+helm repo remove loki      # If you added a separate Loki repo
 ```
 
-
-
-## if you want to delete all resources
+3) Delete the Minikube Cluster
 ```bash
- helm uninstall loki-stack
- helm repo remove grafana
- sudo rm /usr/local
+minikube delete
+sudo rm /usr/local/bin/minikube
+sudo rm /usr/local/bin/kubectl
+rm -rf ~/.minikube
+rm -rf ~/.kube
 ```
