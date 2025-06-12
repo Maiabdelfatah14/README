@@ -124,7 +124,7 @@ in grafana >> explore
 
 ## To connect from pod grafana to loki in terminal 
 ```bash
-kubectl exec -it   grafana-59b6644864-rgw8c  -- /bin/bash
+kubectl exec -it   loki-stack-grafana-6f56d6dd85-gnntd   -- /bin/bash
 curl -v http://loki-stack.default:3100/ready
 ```
 ![image](https://github.com/user-attachments/assets/5ef358f3-94ac-46cf-8c1d-8bdad34b25cd)
