@@ -102,8 +102,7 @@ helm install loki-stack grafana/loki-stack -f loki-stack-values.yaml
 
 
 Verify Installation and Access Loki/Grafana
-```bash
-kubectl port-forward pod/grafana-59b6644864-rgw8c 3000:3000                     
+```bash                    
 kubectl port-forward svc/loki-stack 3000:80 
 ```
 Then to access the Grafana dashboard in browser 
@@ -142,12 +141,10 @@ helm repo update
 
 B) Install Prometheus + Grafana Stack  ( Metrices ) 
 ```bash
-kubectl create namespace monitoring
-helm install prometheus-stack prometheus-community/kube-prometheus-stack  --namespace monitoring
+helm install prometheus-stack prometheus-community/kube-prometheus-stack  
 kubectl get pods                 ( If all pods are running ) 
 
-kubectl port-forward pod/prometheus-stack-grafana-56d84b4f48-dwthm 3000:3000                                                   
-kubectl port-forward pod/prometheus-prometheus-stack-kube-prom-prometheus-0 9090:9090                            
+kubectl port-forward svc/prometheus-stack-grafana 3000:3000                                                                             
 ```
 
 
@@ -158,7 +155,6 @@ c) in grafana
 ```bash
 1- Name : admin
 2- Passwd:
-kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 kubectl get secret prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode    (prometheus)
 ```
 ![image](https://github.com/user-attachments/assets/79f3d98c-7162-419e-8621-d6fa078caf4f)
