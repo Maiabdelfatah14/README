@@ -141,7 +141,7 @@ helm repo update
 
 B) Install Prometheus + Grafana Stack  ( Metrices ) 
 ```bash
-helm install prometheus-stack prometheus-community/kube-prometheus-stack --set grafana.enabled=false
+helm install prometheus-stack prometheus-community/kube-prometheus-stack --set grafana.enabled=false   ( 3shan ykon 3andy pod grafana one bs , loki-stack-grafana)
 kubectl get pods                 ( If all pods are running ) 
 
 kubectl port-forward service/loki-stack-grafana -n default 3000:80                                                                            
@@ -155,11 +155,10 @@ c) in grafana
 ```bash
 1- Name : admin
 2- Passwd:
-kubectl get secret prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode    (prometheus)
+kubectl get secret loki-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode           (loki)
 url :   http://prometheus-stack-kube-prom-prometheus.default:9090
 ```
-![image](https://github.com/user-attachments/assets/79f3d98c-7162-419e-8621-d6fa078caf4f)
-![image](https://github.com/user-attachments/assets/6953f04a-2e5f-409a-8331-cb4c92692fa5)
+![image](https://github.com/user-attachments/assets/afbf3cf9-e355-45f5-9f52-7a03f69d4e3e)
 
 
 ## Uninstall Helm Releases
