@@ -63,6 +63,7 @@ kubectl get nodes
 ## B) Create app and service Nodeport
 Create a sample application deployment and expose it as a NodePort service
 ```bash
+Hello Minikube | Kubernetes
 minikube start
 kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
 kubectl expose deployment hello-node --type=NodePort --port=8080
