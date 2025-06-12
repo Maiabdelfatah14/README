@@ -30,17 +30,20 @@ https://docs.docker.com/engine/install/ubuntu/
 sudo dnf install docker-ce docker-ce-cli containerd.io -y
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
+newgrp docker # Apply group changes immediately in the current shell
 systemctl status docker
 ```
 
 ## 4. Install minikube
 ```bash
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-latest.x86_64.rpm
-sudo rpm -ivh minikube-latest.x86_64.rpm
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+chmod +x minikube-linux-amd64
+sudo mv minikube-linux-amd64 /usr/local/bin/minikube
 ```
 
 ## 5. Install kubectl 
 ```bash
+sudo snap install kubectl --classic
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
