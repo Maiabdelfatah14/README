@@ -9,6 +9,7 @@
 
 #  important ( install one pod grafana to avoid errors )
 •  Grafana Agent يجمع البيانات من بيئتك.   ( mmkn uninstall , forwaord and then access prowser )
+
 •  Grafana يعرض هذه البيانات التي جمعها Agent في لوحات معلومات سهلة الفهم.   ( should install to access browser )
 
 
