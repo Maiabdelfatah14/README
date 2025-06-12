@@ -141,7 +141,7 @@ helm repo update
 
 B) Install Prometheus + Grafana Stack  ( Metrices ) 
 ```bash
-helm install prometheus-stack prometheus-community/kube-prometheus-stack  
+helm install prometheus-stack prometheus-community/kube-prometheus-stack --set grafana.enabled=false
 kubectl get pods                 ( If all pods are running ) 
 
 kubectl port-forward svc/prometheus-stack-grafana 3000:3000                                                                             
