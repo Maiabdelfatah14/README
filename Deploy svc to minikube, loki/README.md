@@ -91,14 +91,13 @@ Add Grafana Helm Repository
 ```bash
  helm repo add grafana https://grafana.github.io/helm-charts
  helm repo update
- helm install grafana grafana/grafana -n default
 ```
 
 Install Loki Stack
 ```bash
 helm show values grafana/loki-stack > loki-stack-values.yaml
 Nano loki-stack-values.yaml
-(enable : false )   (3lshan pod loki-stack-grafana not install 3shan hy7sal error beacouse i install grafana pod)
+(enable : true  , service / type: clusterip ) 
 helm install loki-stack grafana/loki-stack 
 ```
 
@@ -136,12 +135,14 @@ Install Grafana and Prometheus using Helm charts for monitoring my cluster.
 A) Add Helm Repository
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 ```
 
 B) Install Prometheus + Grafana Stack  ( Metrices ) 
 ```bash
-helm install prometheus-stack prometheus-community/kube-prometheus-stack
+kubectl create namespace monitoring
+helm install prometheus-stack prometheus-community/kube-prometheus-stack  --namespace monitoring
 kubectl get pods                 ( If all pods are running ) 
 
 kubectl port-forward pod/prometheus-stack-grafana-56d84b4f48-dwthm 3000:3000                                                   
@@ -156,6 +157,7 @@ c) in grafana
 ```bash
 1- Name : admin
 2- Passwd:
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 kubectl get secret prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode    (prometheus)
 ```
 ![image](https://github.com/user-attachments/assets/79f3d98c-7162-419e-8621-d6fa078caf4f)
