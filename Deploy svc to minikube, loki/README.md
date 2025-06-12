@@ -56,9 +56,7 @@ minikube start --driver=docker
 minikube status
 kubectl get nodes
 ```
-![image](https://github.com/user-attachments/assets/5d2ee184-4a63-4dae-a47f-a4e11da93136)
-![image](https://github.com/user-attachments/assets/fb9b5a97-7824-4295-8066-f087bf0a7784)
-
+![image](https://github.com/user-attachments/assets/16110282-2eb4-42df-8d12-511efdf0831f)
 
 ## B) Create app and service Nodeport
 Create a sample application deployment and expose it as a NodePort service
@@ -72,8 +70,7 @@ kubectl get services
 minikube service hello-node
 kubectl logs <pod-name>
 ```
-![image](https://github.com/user-attachments/assets/d96ef8d5-5d31-40c7-ab34-82e02393e869)
-![image](https://github.com/user-attachments/assets/6cfd1e81-3a37-4639-92d8-de2ed7dec182)
+![image](https://github.com/user-attachments/assets/bc00dfc3-49a7-49ff-932f-8dee9e3a6f92)
 
 
 ## C) Install grafana and promethues with helm
@@ -91,20 +88,23 @@ Add Grafana Helm Repository
 ```bash
  helm repo add grafana https://grafana.github.io/helm-charts
  helm repo update
+helm search repo loki
 ```
 
 Install Loki Stack
 ```bash
 helm show values grafana/loki-stack > loki-stack-values.yaml
-Nano loki-stack-values.yaml
-(enable : true  , service / type: clusterip ) 
-helm install loki-stack grafana/loki-stack 
+vim loki-stack-values.yaml
+(enable : true  , service / type: NodePort ) 
+helm install loki-stack grafana/loki-stack -f loki-stack-values.yaml 
 ```
+![image](https://github.com/user-attachments/assets/61aba693-8e4b-473e-ad2b-6fb4f2d2f419)
+
 
 Verify Installation and Access Loki/Grafana
 ```bash
 kubectl port-forward pod/grafana-59b6644864-rgw8c 3000:3000                     
-kubectl port-forward svc/loki-stack 3100:3100  
+kubectl port-forward svc/loki-stack 3000:80 
 ```
 Then to access the Grafana dashboard in browser 
 >>  http://localhost:3000
@@ -117,8 +117,9 @@ kubectl get secret loki-stack-grafana -o jsonpath="{.data.admin-password}" | bas
 ```
 
 in grafana >> explore 
-![image](https://github.com/user-attachments/assets/13111064-8df8-442b-a5ee-397a1e950c4e)
-![image](https://github.com/user-attachments/assets/acce8851-e53e-4e7e-bd7c-2ae1b830ab5f)
+![image](https://github.com/user-attachments/assets/a4ae6f71-01e0-4a3c-870e-6ec8442cee1e)
+![image](https://github.com/user-attachments/assets/0cb039f7-11c8-4072-8e77-2ce2fd6378c7)
+![image](https://github.com/user-attachments/assets/2b88dc80-aa5f-4cdb-9c9a-9d1259d43069)
 
 
 ## To connect from pod grafana to loki in terminal 
