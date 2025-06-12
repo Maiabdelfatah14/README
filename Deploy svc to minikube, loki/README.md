@@ -156,6 +156,7 @@ c) in grafana
 1- Name : admin
 2- Passwd:
 kubectl get secret prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode    (prometheus)
+url :   http://prometheus-stack-kube-prom-prometheus.default:9090
 ```
 ![image](https://github.com/user-attachments/assets/79f3d98c-7162-419e-8621-d6fa078caf4f)
 ![image](https://github.com/user-attachments/assets/6953f04a-2e5f-409a-8331-cb4c92692fa5)
