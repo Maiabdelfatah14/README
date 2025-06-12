@@ -25,6 +25,7 @@ Make sure this is okay :-
 
 ## 1. install docker 
 ```bash
+https://docs.docker.com/engine/install/ubuntu/
 sudo dnf install docker-ce docker-ce-cli containerd.io -y
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
