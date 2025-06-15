@@ -195,26 +195,21 @@ helm get values  prometheus-stack -o yaml > prometheus-stack-values.yaml
 in file prometheus-stack-values.yaml
 ```bash
 # prometheus-stack-values.yaml
-# ... بقية الـ configs بتاعتك
 
-# تعطيل مراقبة مكونات الكلاستر التي تسبب "connection refused"
-kubeControllerManager:
+grafana:
   enabled: false
-kubeEtcd:
-  enabled: false
-kubeScheduler:
-  enabled: false
+
 
 prometheus:
   prometheusSpec:
     additionalScrapeConfigs:
-      - job_name: 'blackbox-http-probes' # اسم لهذا الـ Job في Prometheus
-        metrics_path: /probe # المسار الذي يتم من خلاله فحص الـ Exporter
+      - job_name: 'blackbox-http-probes'
+        metrics_path: /probe
         params:
-          module: ['http_2xx'] # الوحدة (module) التي سيستخدمها Blackbox Exporter (هنا: تحقق من استجابة HTTP 200 OK)
+          module: ['http_2xx']
         static_configs:
           - targets:
-              - http://hello-node:8080 # الخدمة التي تريد مراقبتها (مثال: hello-node)
+              - http://hello-node:8080
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -222,15 +217,48 @@ prometheus:
             target_label: instance
           - target_label: __address__
             replacement: blackbox-exporter-prometheus-blackbox-exporter.default.svc.cluster.local:9115
-          - source_labels: [__param_target] # يمكنك إضافة labels مفيدة
-            target_label: target_url # لجعل URL الهدف كـ label
+          - source_labels: [__param_target]
+            target_label: target_url
 
+kubeControllerManager:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
 # ... لو فيه أي configs تانية تحت
 ```
 
 ```bash
 helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
   -f prometheus-stack-values.yaml
-kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090
 ```
-![image](https://github.com/user-attachments/assets/66e94aa1-ed13-451f-9c50-cf385bcd3086)
+
+# A)	Delete deployment and service 
+```bash
+kubectl delete deployment hello-node -n default
+kubectl delete service hello-node -n default
+```
+then 
+```bash
+kubectl port-forward service/loki-stack-grafana -n default 3000:80
+import dashboard  Dashboard ID  ( 7587 )  
+```
+![image](https://github.com/user-attachments/assets/4f2b7dc1-45f8-4d55-be91-72878f469bf5)
+
+
+# B) create deployment again 
+```bash
+kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
+kubectl expose deployment hello-node --type=NodePort --port=8080
+```
+![image](https://github.com/user-attachments/assets/6a39c230-3173-4278-a9f3-a8c675cc3807)
+
+
+## can show in 
+```bash
+kubectl port-forward svc/blackbox-exporter-prometheus-blackbox-exporter  9115
+```
+![image](https://github.com/user-attachments/assets/1d1d32dd-bb95-40d2-9713-5481fbd56348)
