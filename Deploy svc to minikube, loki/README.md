@@ -233,3 +233,4 @@ helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
   -f prometheus-stack-values.yaml
 kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090
 ```
+![image](https://github.com/user-attachments/assets/66e94aa1-ed13-451f-9c50-cf385bcd3086)
