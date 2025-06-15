@@ -184,3 +184,52 @@ sudo rm /usr/local/bin/kubectl
 rm -rf ~/.minikube
 rm -rf ~/.kube
 ```
+
+## to add blackbox to check the service 
+```bash 
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install blackbox-exporter prometheus-community/prometheus-blackbox-exporter
+helm get values  prometheus-stack -o yaml > prometheus-stack-values.yaml
+```
+in file prometheus-stack-values.yaml
+```bash
+# prometheus-stack-values.yaml
+# ... بقية الـ configs بتاعتك
+
+# تعطيل مراقبة مكونات الكلاستر التي تسبب "connection refused"
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: 'blackbox-http-probes' # اسم لهذا الـ Job في Prometheus
+        metrics_path: /probe # المسار الذي يتم من خلاله فحص الـ Exporter
+        params:
+          module: ['http_2xx'] # الوحدة (module) التي سيستخدمها Blackbox Exporter (هنا: تحقق من استجابة HTTP 200 OK)
+        static_configs:
+          - targets:
+              - http://hello-node:8080 # الخدمة التي تريد مراقبتها (مثال: hello-node)
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter-prometheus-blackbox-exporter.default.svc.cluster.local:9115
+          - source_labels: [__param_target] # يمكنك إضافة labels مفيدة
+            target_label: target_url # لجعل URL الهدف كـ label
+
+# ... لو فيه أي configs تانية تحت
+```
+
+```bash
+helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
+  -f prometheus-stack-values.yaml
+kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090
+```
