@@ -248,6 +248,10 @@ import dashboard  Dashboard ID  ( 7587 )
 ```
 ![image](https://github.com/user-attachments/assets/4f2b7dc1-45f8-4d55-be91-72878f469bf5)
 
+# add Availability (SLI)
+![image](https://github.com/user-attachments/assets/18503afc-6301-4a74-9c86-7adfd38a3712)
+
+
 
 # B) create deployment again 
 ```bash
@@ -255,6 +259,9 @@ kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agn
 kubectl expose deployment hello-node --type=NodePort --port=8080
 ```
 ![image](https://github.com/user-attachments/assets/6a39c230-3173-4278-a9f3-a8c675cc3807)
+
+# add Availability (SLI)
+![image](https://github.com/user-attachments/assets/894c017e-8e19-4067-94c4-9e7350b318c2)
 
 
 ## can show in 
