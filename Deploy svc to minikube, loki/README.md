@@ -269,3 +269,128 @@ kubectl expose deployment hello-node --type=NodePort --port=8080
 kubectl port-forward svc/blackbox-exporter-prometheus-blackbox-exporter  9115
 ```
 ![image](https://github.com/user-attachments/assets/1d1d32dd-bb95-40d2-9713-5481fbd56348)
+
+
+###  api ( https://run.mocky.io/v3/42810a1a-eb2d-4a62-a8a5-e1a3958c7b37 )
+## get token from api by k6 :
+```bash
+ sudo snap install k6
+ vim test.js
+ k6 run test.js
+ ```
+```bash
+cat test.js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+
+export const options = {
+  vus: 4,
+  duration: '1s',
+  thresholds: {
+    'http_req_failed': ['rate<0.01'],     // http errors should be less than 1%
+    'http_req_duration': ['p(95)<200'],   // 95% of requests should be below 200ms
+    'checks': ['rate>0.99'],   // 99% of checks should pass
+  },
+};
+
+
+export default function () {
+  // Step 1: Login and get the authentication token
+  const loginRes = http.get('https://run.mocky.io/v3/42810a1a-eb2d-4a62-a8a5-e1a3958c7b37', {
+    username: 'myuser',
+    password: 'mypassword',
+  });
+
+  // Check if the login was successful and extract the token
+  check(loginRes, {
+    'login successful': (res) => res.status === 200,
+    'has auth token': (res) => res.json('token') !== '',
+  });
+
+  // Extract the token from the response
+  const authToken = loginRes.json('token');
+
+  console.log(authToken);
+  // Add a small delay to simulate user think time
+  sleep(1);
+
+  // Step 2: Fetch the user profile using the token+
+  if (authToken) {
+    const profileRes = http.get('https://run.mocky.io/v3/42810a1a-eb2d-4a62-a8a5-e1a3958c7b37', {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+
+    // Check if the profile was fetched successfully
+    check(profileRes, {
+      'profile fetched successfully': (res) => res.status === 200,
+      'profile contains user data': (res) => res.json('userId') !== '',
+    });
+  }
+}
+```
+
+
+## integrate with promethues ( use xk6 to integrate by remote write ):
+```bash 
+go install go.k6.io/xk6/cmd/xk6@latest
+xk6 build v0.48.0 --with github.com/grafana/xk6-output-prometheus-remote
+```
+
+```bash
+cat prometheus-stack-values.yaml
+helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
+  -f prometheus-stack-values.yaml 
+```
+```bash
+grafana:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    additionalArgs:
+      - name: web.enable-remote-write-receiver
+
+  remoteWrite:
+      - url: "http://prometheus-stack-kube-prom-prometheus.default:9090/api/v1/write"
+    additionalScrapeConfigs:
+      - job_name: 'blackbox-http-probes'
+        metrics_path: /probe
+        params:
+          module: ['http_2xx']
+        static_configs:
+          - targets:
+              - http://hello-node:8080
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter-prometheus-blackbox-exporter.default.svc.cluster.local:9115
+          - source_labels: [__param_target]
+            target_label: target_url
+
+kubeControllerManager:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+```
+## in browser 
+```bash
+kubectl port-forward  svc/prometheus-stack-kube-prom-prometheus 9090:9090
+K6_PROMETHEUS_RW_SERVER_URL="http://localhost:9090/api/v1/write" \
+./k6 run --out experimental-prometheus-rw test.js
+
+http://localhost:3000
+>>>>>>>   2587  ( id dashboard )
+```
+![image](https://github.com/user-attachments/assets/f7e90f9f-d468-461e-94f0-6796cc925b82)
+![image](https://github.com/user-attachments/assets/efc13b40-749b-4d1c-b10c-26ca8a6d8ec9)
+
