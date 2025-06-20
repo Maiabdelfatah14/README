@@ -254,12 +254,15 @@ import dashboard  Dashboard ID  ( 13659 )
 
 # add Availability (SLI)
 ```bash
-stat
-title:  Hello-node Current Availability
-Thresholds :  99.99 green , red
-unit :peresent
-Fields :   a7dd 3ayza eh show )
-Query :
+
+Title: Hello-node Current Availability
+stat 
+Unit: Percent (%)
+Thresholds:
+Green: ≥ 99.99
+Red: < 99.99
+Display: Value only
+
 avg_over_time(
   probe_success{
     instance="http://hello-node:8080",
@@ -268,12 +271,14 @@ avg_over_time(
   }[$__range]
 ) * 100
 
+-----------------------------------------------------
+Title: Hello-node Monthly Availability
 
+Unit: Percent (%)
+Thresholds (اختياري):
+Green: ≥ 99.99
+Red: < 99.99
 
-
-title:  Hello-node Monthly Availability
-
-query :
 avg_over_time(
   probe_success{
     instance="http://hello-node:8080",
@@ -281,6 +286,24 @@ avg_over_time(
     target_url="http://hello-node:8080"
   }[30d]
 ) * 100
+
+----------------------------------------------------
+Title	Hello-node Service Status
+Panel Type  >>  	Stat
+Unit  >>  	None
+Text Mode  >> 	Value
+Value mappings	:
+1 → UP	✅
+0 → DOWN	✅
+Color mappings (optional)	
+UP = أخضر	🟢
+DOWN = أحمر	🔴
+
+probe_success{
+  instance="http://hello-node:8080",
+  job="blackbox-http-probes",
+  target_url="http://hello-node:8080"
+}
 
 ```
 ![image](https://github.com/user-attachments/assets/18503afc-6301-4a74-9c86-7adfd38a3712)
