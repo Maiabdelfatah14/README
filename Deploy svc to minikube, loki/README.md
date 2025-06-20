@@ -253,6 +253,36 @@ import dashboard  Dashboard ID  ( 13659 )
 
 
 # add Availability (SLI)
+```bash
+stat
+title:  Hello-node Current Availability
+Thresholds :  99.99 green , red
+unit :peresent
+Fields :   a7dd 3ayza eh show )
+Query :
+avg_over_time(
+  probe_success{
+    instance="http://hello-node:8080",
+    job="blackbox-http-probes",
+    target_url="http://hello-node:8080"
+  }[$__range]
+) * 100
+
+
+
+
+title:  Hello-node Monthly Availability
+
+query :
+avg_over_time(
+  probe_success{
+    instance="http://hello-node:8080",
+    job="blackbox-http-probes",
+    target_url="http://hello-node:8080"
+  }[30d]
+) * 100
+
+```
 ![image](https://github.com/user-attachments/assets/18503afc-6301-4a74-9c86-7adfd38a3712)
 
 
