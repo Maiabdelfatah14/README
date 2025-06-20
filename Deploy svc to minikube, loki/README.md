@@ -186,7 +186,7 @@ rm -rf ~/.minikube
 rm -rf ~/.kube
 ```
 
-## to add blackbox to check the service 
+## to add blackbox to check the service  ( to show up or down )
 ```bash 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
