@@ -448,7 +448,7 @@ K6_PROMETHEUS_RW_SERVER_URL="http://localhost:9090/api/v1/write" \
 ./k6 run --out experimental-prometheus-rw test.js
 
 http://localhost:3000
->>>>>>>   2587  ( id dashboard )
+>>>>>>>   2587 , 19665  ( id dashboard )
 ```
 ![image](https://github.com/user-attachments/assets/f7e90f9f-d468-461e-94f0-6796cc925b82)
 ![image](https://github.com/user-attachments/assets/efc13b40-749b-4d1c-b10c-26ca8a6d8ec9)
