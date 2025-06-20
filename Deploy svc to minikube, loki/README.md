@@ -157,6 +157,7 @@ c) in grafana
 2- Passwd:
 kubectl get secret loki-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode           (loki)
 url :   http://prometheus-stack-kube-prom-prometheus.default:9090
+import dashboard  , ID  ( 6417 )
 ```
 ![image](https://github.com/user-attachments/assets/afbf3cf9-e355-45f5-9f52-7a03f69d4e3e)
 
