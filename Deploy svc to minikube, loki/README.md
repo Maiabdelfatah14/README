@@ -453,3 +453,25 @@ http://localhost:3000
 ![image](https://github.com/user-attachments/assets/f7e90f9f-d468-461e-94f0-6796cc925b82)
 ![image](https://github.com/user-attachments/assets/efc13b40-749b-4d1c-b10c-26ca8a6d8ec9)
 
+
+## dashoard to k6  SLA
+```bash
+
+● Panel Type: Stat
+● Title: Monthly Availability (SLA)
+● Query:
+promql
+Copy
+Edit
+(1 - avg_over_time(k6_http_req_failed_rate[30d])) * 100
+
+● Unit:
+ Percent (0–100)
+
+● Thresholds:
+gren ≥ 99.99
+red < 99.99
+
+```
+
+
