@@ -245,9 +245,12 @@ kubectl delete service hello-node -n default
 then 
 ```bash
 kubectl port-forward service/loki-stack-grafana -n default 3000:80
-import dashboard  Dashboard ID  ( 7587 )  
+import dashboard  Dashboard ID  ( 13659 )  
 ```
-![image](https://github.com/user-attachments/assets/4f2b7dc1-45f8-4d55-be91-72878f469bf5)
+
+![image](https://github.com/user-attachments/assets/8d8c56a3-5b5c-4dc5-841d-3a723a5d93c6)
+
+
 
 # add Availability (SLI)
 ![image](https://github.com/user-attachments/assets/18503afc-6301-4a74-9c86-7adfd38a3712)
@@ -259,7 +262,8 @@ import dashboard  Dashboard ID  ( 7587 )
 kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
 kubectl expose deployment hello-node --type=NodePort --port=8080
 ```
-![image](https://github.com/user-attachments/assets/6a39c230-3173-4278-a9f3-a8c675cc3807)
+
+![image](https://github.com/user-attachments/assets/c6cc6a3c-4d70-4192-b742-8b181747ffc6)
 
 # add Availability (SLI)
 ![image](https://github.com/user-attachments/assets/894c017e-8e19-4067-94c4-9e7350b318c2)
