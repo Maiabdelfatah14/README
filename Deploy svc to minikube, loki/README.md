@@ -321,8 +321,6 @@ kubectl expose deployment hello-node --type=NodePort --port=8080
 
 ![image](https://github.com/user-attachments/assets/c6cc6a3c-4d70-4192-b742-8b181747ffc6)
 
-# add Availability (SLI)
-![image](https://github.com/user-attachments/assets/894c017e-8e19-4067-94c4-9e7350b318c2)
 
 
 ## can show in 
