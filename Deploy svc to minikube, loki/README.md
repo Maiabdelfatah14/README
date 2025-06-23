@@ -474,5 +474,101 @@ gren ≥ 99.99
 red < 99.99
 
 ```
+## to add alert :
 
+help me in promethues ui  ( http://localhost:9090/)
+```bash
+quers :
+(1 - k6_http_req_failed_rate) * 100
+
+{__name__=~"k6_.*"}
+
+k6_checks_rate
+```
+```bash
+1- name : HighHttpRequestFailureRate
+
+2- query :  max_over_time(k6_http_req_failed_rate[6h])
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is above   0
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    High HTTP request failure rate
+  
+  Description (optional)
+     >>>   More than 10% of HTTP requests have failed in the last 6 hours
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+```bash
+1- name : LoginSuccessRateTooLow
+
+2- query :  max_over_time(k6_checks_rate{check="login successful", scenario="default"}[1d]) < 0.9
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is below   0.9    << important
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    Login success rate is below 90% over the last 1 Day
+  
+  Description (optional)
+     >>>   The maximum login success rate over the past 1 day has dropped below 90%.
+  This may indicate repeated login failures or instability in the authentication process.
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+
+```bash
+1- name : AuthTokenMissingRateHigh
+
+2- query :  max_over_time(k6_checks_rate{check="has auth token", scenario="default"}[1h]) < 0.95
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is below   0.95    << important
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    High rate of missing authentication token
+  
+  Description (optional)
+     >>>   The check 'has auth token' has failed more than 5% of the time in the last 5 minutes.
+      This may indicate that users are not receiving auth tokens after login.
+      Please verify the login service and token generation mechanism..
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+![image](https://github.com/user-attachments/assets/9427cee0-0797-48c7-8f8c-4a59f78016da)
 
