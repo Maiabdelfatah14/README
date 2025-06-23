@@ -340,12 +340,13 @@ kubectl port-forward svc/blackbox-exporter-prometheus-blackbox-exporter  9115
  ```
 ```bash
 cat test.js
+
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 
 export const options = {
-  vus: 4,
+  vus: 1,
   duration: '1s',
   thresholds: {
     'http_req_failed': ['rate<0.01'],     // http errors should be less than 1%
@@ -353,6 +354,9 @@ export const options = {
     'checks': ['rate>0.99'],   // 99% of checks should pass
   },
 };
+
+
+
 
 
 export default function () {
@@ -365,7 +369,8 @@ export default function () {
   // Check if the login was successful and extract the token
   check(loginRes, {
     'login successful': (res) => res.status === 200,
-    'has auth token': (res) => res.json('token') !== '',
+    'has auth token': (res) => typeof res.json('token') === 'string' && res.json('token').length > 0
+
   });
 
   // Extract the token from the response
