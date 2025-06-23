@@ -474,6 +474,9 @@ gren ≥ 99.99
 red < 99.99
 
 ```
+![image](https://github.com/user-attachments/assets/1ba1d585-ac42-4b5e-9195-dc4593ad550d)
+
+
 ## to add alert :
 
 help me in promethues ui  ( http://localhost:9090/)
