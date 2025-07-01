@@ -323,7 +323,7 @@ kubectl port-forward svc/blackbox-exporter-prometheus-blackbox-exporter  9115
 
 
 ###  api ( https://run.mocky.io/v3/42810a1a-eb2d-4a62-a8a5-e1a3958c7b37 )
-## get token from api by k6 :
+## get token from api by k6 : [ alert , SLA ] ( this dont use i update to create my service pod and k6 pod ]
 ```bash
  sudo snap install k6
  vim test.js
