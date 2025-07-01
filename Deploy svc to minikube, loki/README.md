@@ -243,14 +243,19 @@ helm upgrade prometheus-stack prometheus-community/kube-prometheus-stack \
 kubectl delete deployment hello-node -n default
 kubectl delete service hello-node -n default
 ```
+# B) create deployment again 
+```bash
+kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
+kubectl expose deployment hello-node --type=NodePort --port=8080
+```
+
 then 
 ```bash
 kubectl port-forward service/loki-stack-grafana -n default 3000:80
 import dashboard  Dashboard ID  ( 13659 )  
 ```
-
 ![image](https://github.com/user-attachments/assets/8d8c56a3-5b5c-4dc5-841d-3a723a5d93c6)
-
+![image](https://github.com/user-attachments/assets/c6cc6a3c-4d70-4192-b742-8b181747ffc6)
 
 
 # add Availability (SLI)
@@ -308,17 +313,6 @@ probe_success{
 
 ```
 ![image](https://github.com/user-attachments/assets/68048978-c9ab-4290-8198-d8baab98637d)
-
-
-
-# B) create deployment again 
-```bash
-kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.39 -- /agnhost netexec --http-port=8080
-kubectl expose deployment hello-node --type=NodePort --port=8080
-```
-
-![image](https://github.com/user-attachments/assets/c6cc6a3c-4d70-4192-b742-8b181747ffc6)
-
 
 
 ## can show in 
@@ -794,7 +788,7 @@ spec:
 
 8-   kubectl logs -f -l app=k6-loop
 ```
-##  to delete and create service
+##  Delete and create service
 ```bash
 ## delete service 
 -  kubectl delete deployment my-service
@@ -822,8 +816,7 @@ avg_over_time(k6_checks_rate{check="login successful"}[1m]) * 100
 gren ≥ 99.99
 red < 99.99
    
-
-
+--------------------------------------------------------------------------------
 2-   Monthly Availability (SLA)
 ● Panel Type: Stat
 ● Title:   Monthly Availability (SLA)
@@ -837,9 +830,7 @@ avg_over_time(k6_checks_rate{check="login successful"}[30d]) * 100
 gren ≥ 99.99
 red < 99.99
 
-
-
-
+---------------------------------------------------------------------
 3-    Service Status – My Service
 ● Panel Type: Stat
 ● Title:   Service Status – My Service
