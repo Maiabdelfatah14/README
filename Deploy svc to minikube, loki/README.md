@@ -850,3 +850,102 @@ avg_over_time(k6_checks_rate{check="login successful"}[1m])
 0    red 
 ```
 ![image](https://github.com/user-attachments/assets/4a123290-c433-43be-b71b-292ba60ca039)
+
+
+## to add alert :
+
+help me in promethues ui  ( http://localhost:9090/)
+```bash
+quers :
+(1 - k6_http_req_failed_rate) * 100
+
+{__name__=~"k6_.*"}
+
+k6_checks_rate
+```
+```bash
+1- name : LoginSuccessRateLow
+
+2- query : avg_over_time(k6_checks_rate{check="login successful"}[1m])
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is below   0.9
+
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    Login success rate dropped below 90% in the last minute
+  
+  Description (optional)
+     >>>   The average rate of the "login successful" check fell below 90% during the last 1 minute window.
+            This could indicate issues with /api/token or /api/data endpoints.
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+```bash
+1- name : Service is likely DOWN
+
+2- query : avg_over_time(k6_http_req_failed_rate{url=~".*my-service.*"}[1m])
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is above    0.5     << important
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    More than 50% of requests to my-service failed
+  
+  Description (optional)
+     >>>   k6 reports that over 50% of requests to my-service failed in the last minute. This likely indicates the service is down (e.g., DNS, crash, timeout).
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+
+```bash
+1- name : AuthTokenMissingRateHigh
+
+2- query :  avg_over_time(k6_checks_rate{check="has auth token"}[1m])
+     B Reduce
+         Input  A
+         Function   Last     Mode   Strict
+
+     C  Threshold
+          Input  B
+          Is below    0.9    << important
+
+3. Set evaluation behavior
+   Folder : alert    ,   group : any name
+   Pending period  :  1m   ( lw a3d 1m ab3t el alert )
+
+4. Add annotations
+  Summary (optional)
+     >>>    High rate of missing authentication token
+  
+  Description (optional)
+     >>>   The check has auth token is failing more than 10% of the time in the past 1 minute. This may indicate that users are not receiving tokens after logging in. Investigate the /api/token endpoint or auth logic.
+
+5. Labels and notifications
+     Labels
+    severity  = critical
+```
+![image](https://github.com/user-attachments/assets/9a3cbcca-7dc5-40de-a187-22e53bc59b67)
+
