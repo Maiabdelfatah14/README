@@ -307,10 +307,7 @@ probe_success{
 }
 
 ```
-
-![image](https://github.com/user-attachments/assets/148c3184-c6f8-455a-8b34-4c05a92cd9e6)
-
-![image](https://github.com/user-attachments/assets/1f032030-7ce2-4fee-87f3-70a616570182)
+![image](https://github.com/user-attachments/assets/68048978-c9ab-4290-8198-d8baab98637d)
 
 
 
