@@ -580,3 +580,285 @@ k6_checks_rate
 ```
 ![image](https://github.com/user-attachments/assets/9427cee0-0797-48c7-8f8c-4a59f78016da)
 
+
+## create service to use tool k6  :  [ my-service ]
+###  Project Structure: 
+
+my-service/
+├── index.js
+├── package.json
+```bash
+1-   mkdir my-service 
+2-   cd my-service/
+3-   npm init -y
+4-  npm install express
+
+5-   cat index.js
+
+const express = require('express');
+const app = express();
+const PORT = 5000;
+
+// A simple in-memory token (for demo purposes)
+let token = null;
+
+// First API: issue a token
+app.get('/api/token', (req, res) => {
+  token = 'secure-token-123'; // You can use uuid or JWT for production
+  res.json({ token });
+});
+
+// Second API: validate token
+app.get('/api/data', (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const receivedToken = authHeader?.split(' ')[1]; // Expect: Bearer secure-token-123
+
+  if (receivedToken === token) {
+    res.status(200).json({ message: 'Token is valid, access granted.' });
+  } else {
+    res.status(401).json({ message: 'Invalid or missing token.' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+
+6- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+7-  export NVM_DIR="$HOME/.nvm"
+8-  source "$NVM_DIR/nvm.sh"
+9-  nvm install --lts
+10-    node -v      &    npm -v
+11-  node index.js    ( to access service )
+
+
+>>> in new Terminal 
+
+    1- curl http://localhost:5000/api/token
+    2-  curl -H "Authorization: Bearer secure-token-123" http://localhost:5000/api/data
+```
+## to create image and do pod for this service 
+```bash
+cd  my-service 
+
+1-  # Dockerfile
+FROM node:18
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 5000
+CMD ["node", "index.js"]
+
+>>> eval $(minikube docker-env)    // to run env docker in k8s 
+2-   docker build -t my-service:latest .
+
+## create deployment and service 
+3-   my-service.yaml :
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-service
+  template:
+    metadata:
+      labels:
+        app: my-service
+    spec:
+      containers:
+      - name: my-service
+        image: my-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  namespace: default
+spec:
+  selector:
+    app: my-service
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+
+4-  kubectl apply -f my-service.yaml
+
+>>>>    kubectl port-forward service/my-service 5000:5000
+
+           http://localhost:5000/api/token
+           http://localhost:5000/api/data
+```
+```bash
+5-   test.js  :
+
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  vus: 1,
+  duration: '1s',
+  thresholds: {
+    'http_req_failed': ['rate<0.01'],
+    'http_req_duration': ['p(95)<200'],
+    'checks': ['rate>0.99'],
+  },
+};
+
+export default function () {
+  // Step 1: Get token
+  const loginRes = http.get('http://my-service.default.svc.cluster.local:5000/api/token');
+
+  check(loginRes, {
+    'login successful': (res) => res.status === 200,
+    'has auth token': (res) => typeof res.json('token') === 'string' && res.json('token').length > 0,
+  });
+
+  const token = loginRes.json('token');
+  sleep(1);
+
+  // Step 2: Access protected route
+  if (token) {
+    const profileRes = http.get('http://my-service.default.svc.cluster.local:5000/api/data', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    check(profileRes, {
+      'profile fetched successfully': (res) => res.status === 200,
+      'profile contains user data': (res) => {
+        const msg = res.json('message');
+        return msg && msg.includes('access granted');
+      },
+    });
+  }
+}
+```
+## to do pod for k6 
+```bash 
+5-  kubectl create configmap k6-test-script \
+  --from-file=test.js \
+  --namespace=default
+
+
+6-   k6-loop-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-loop
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k6-loop
+  template:
+    metadata:
+      labels:
+        app: k6-loop
+    spec:
+      containers:
+      - name: k6
+        image: grafana/k6:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            while true; do
+              echo "⏱️ Running k6 test..."
+              k6 run --out experimental-prometheus-rw \
+                --env K6_PROMETHEUS_RW_SERVER_URL=http://prometheus-stack-kube-prom-prometheus.default:9090/api/v1/write \
+                /test/test.js
+              echo "✅ Done. Sleeping 1 minute ..."
+              sleep 60
+            done
+        volumeMounts:
+          - name: k6-script
+            mountPath: /test
+      restartPolicy: Always
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-test-script
+
+
+
+7-    kubectl apply -f k6-loop-deployment.yaml
+
+8-   kubectl logs -f -l app=k6-loop
+```
+##  to delete and create service
+```bash
+## delete service 
+-  kubectl delete deployment my-service
+   kubectl delete service my-service
+
+## create service 
+   cd my-service
+-   kubectl apply -f my-service.yaml
+```
+
+## dashboards for SLA K6 [ service : my-service ] :
+```bash
+>>>  {__name__=~"k6_.*"}   in Prometheus
+
+1-   my-service Current Availability (SLA)
+● Panel Type: Stat
+● Title:   my-service Current Availability (SLA)
+● Query:
+avg_over_time(k6_checks_rate{check="login successful"}[1m]) * 100
+
+● Unit:
+ Percent (0–100)
+
+● Thresholds:
+gren ≥ 99.99
+red < 99.99
+   
+
+
+2-   Monthly Availability (SLA)
+● Panel Type: Stat
+● Title:   Monthly Availability (SLA)
+● Query:
+avg_over_time(k6_checks_rate{check="login successful"}[30d]) * 100
+
+● Unit:
+ Percent (0–100)
+
+● Thresholds:
+gren ≥ 99.99
+red < 99.99
+
+
+
+
+3-    Service Status – My Service
+● Panel Type: Stat
+● Title:   Service Status – My Service
+● Query:
+avg_over_time(k6_checks_rate{check="login successful"}[1m])
+
+● Unit:
+ Percent (0–100)
+
+
+● Value mappings
+1		UP	  green
+0		DOWN	   red
+
+● Thresholds:
+1    gren 
+0    red 
+```
+![image](https://github.com/user-attachments/assets/4a123290-c433-43be-b71b-292ba60ca039)
