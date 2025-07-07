@@ -847,14 +847,323 @@ avg_over_time(k6_checks_rate{check="login successful"}[1m])
 
 ● Thresholds:
 1    gren 
-0    red 
+0    red
+
+--------------------------------------------------------------------------
+4-  Service Status Over Time  ( graph )
+● Panel Type: time series 
+● Title:   Service Status – My Service
+● Query:
+avg_over_time(k6_checks_rate{check="login successful"}[30d]) 
+
+● Axis :
+Soft min
+0
+Soft max
+1
+
+
+● Unit:
+ Percent (0–100)
+
+
+● Value mappings
+1		UP	  green
+0		DOWN	   red
+
+● Thresholds:
+1    gren 
+0    red
 ```
-![image](https://github.com/user-attachments/assets/4a123290-c433-43be-b71b-292ba60ca039)
+![image](https://github.com/user-attachments/assets/0cbea7e1-f76d-4987-aeea-3f88565fedde)
 
 
-## to add alert :
 
-help me in promethues ui  ( http://localhost:9090/)
+## to add alert by grafana on-call :
+>>  https://grafana.com/orgs   ( to add acount in grafanc cloud )
+## to add token to send metrices from k6 to grafana cloud 
+```bash
+https://grafana.com/orgs/maiabdelfatah077/access-policies
+
+##  >>  Create new access policy
+
+● Display name : Prometheus Remote Write
+● Name :  prometheus-remote-write
+● Realms :  maiabdelfatah077 (all stacks)
+
+● Scopes   ( to allow k6 send metrices to grafana cloud )
+metrics	  write 
+logs	      write
+
+●  create 
+
+##  >>>  add token to this policy
+  Create new token
+● Token name :  prometheus-token
+● Expiration date :  No expiry
+● create 
+```
+![image](https://github.com/user-attachments/assets/9bc6f0f0-c930-4e81-8b83-b1cf0f7e54a2)
+
+## this token hykon hena (   K6_PROMETHEUS_RW_PASSWORD ) 
+## >> grafana cloud >> Connections  >> Data sources  >>  grafanacloud-maiabdelfatah077-prom
+ to get ( K6_PROMETHEUS_RW_SERVER_URL , K6_PROMETHEUS_RW_USERNAME )
+
+ # 1- send metrices from k6 to Grafana cloud :
+ ```bash
+  1-  kubectl create configmap k6-cloud-test-script \
+  --from-file=test.js \
+  --namespace=default
+```
+```bash
+>>  2-  k6-loop-cloud-deployment.yaml :
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-loop-cloud
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k6-loop-cloud
+  template:
+    metadata:
+      labels:
+        app: k6-loop-cloud
+    spec:
+      containers:
+      - name: k6
+        image: grafana/k6:latest
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            while true; do
+              echo "⏱️ Running k6 test..."
+              K6_PROMETHEUS_RW_SERVER_URL=https://prometheus-prod-36-prod-us-west-0.grafana.net/api/prom/push \
+              K6_PROMETHEUS_RW_USERNAME=2334137 \
+              K6_PROMETHEUS_RW_PASSWORD=glc_eyJvIjoiMTM4MDk4NyIsIm4iOiJwcm9tZXRoZXVzLXJlbW90ZS13cml0ZS1wcm9tZXRoZXVzLXRva2VuIiwiayI6IndQNTlyaWw3ZDM1MnRhOVZRNHE4QjRkayIsIm0iOnsiciI6InVzIn19 \
+              k6 run --out experimental-prometheus-rw /test/test.js
+              echo "✅ Done. Sleeping 1 minute ..."
+              sleep 60
+            done
+        volumeMounts:
+          - name: k6-script
+            mountPath: /test
+      restartPolicy: Always
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-cloud-test-script
+
+ ```
+```bash
+    3-  kubectl apply -f k6-loop-cloud-deployment.yaml
+    
+    4-  kubectl logs -f deployment/k6-loop-cloud
+```
+
+# 2- in grafana cloud 
+## to add member 
+```bash
+https://grafana.com/orgs/maiabdelfatah077/members?src=grafananet&cnt=invite-user-command-palette
+```
+
+# 3-  to my profile in grafana cloud  
+``` bash
+https://maiabdelfatah077.grafana.net/a/cloud-home-app
+```
+
+# 4- aad alerts by using grafana on-call 
+
+## a-  create team to send alerts 
+```bash
+1-  Grafana → in search → Teams
+  >> add new team
+ ● Team name  :  DevOps Team
+ ● Add members : maiabdelfatah077      Permission  : admin
+ ● create 
+```
+
+## b- Notification Channel
+```bash
+1-  Alerts & IRM  >> Alerting >> Contact points
+>>  create Contact points
+●  Name :  OnCall: DevOps Team
+●  Integration :  Grafana IRM  Recommended
+
+●  How to connect to IRM
+  ( true ) Existing IRM integration
+
+●  IRM Integration
+The IRM integration to send alerts to
+devops-alerts-integration
+
+● save
+```
+## c-  Create Escalation Chain  
+```bash
+Create Escalation Chain
+
+●  Escalation Chain name  :  default-devops-escalation
+●  Assign to team :  DevOps Team
+●  create
+
+>>  select   default-devops-escalation
+ ●  notify all team member
+ ●  Start : Default  notification for  : DevOps Team
+```
+
+## d- add integration 
+```bash
+Add a new Integration
+● Grafana Alerting
+
+New Grafana Alerting integration
+●  Integration Name :  devops-alerts-integration
+●  Assign to team :  DevOps Team
+●  Grafana Alerting Contact point  :  OnCall: DevOps Team
+
+
+●  Add route
+
+●  label  matched by
+    >>   team  :  devops
+
+●  Trigger escalation chain :  default-devops-escalation DevOps Team
+```
+##  f- permation user 
+```bash
+>> IRM  >> Users
+
+maiabdelfatah077@gmail.com
+● Default Team  :  DevOps Team
+● Default notification rules	            Important notification rules	
+  Email                                    	Email
+```
+## e - alert rule
+```bash
+●   1. Enter alert rule name
+      >   Name :  🚨 Login Success Rate Dropped
+      >   grafanacloud-maiabdelfatah077-prom
+
+●  2. Define query and alert condition
+      >  query :
+        >>  avg by(scenario, team) (
+       avg_over_time(k6_checks_rate{check="login successful"}[1m])
+     )
+     
+     >   Is below     : 0.9
+
+●  3. Add folder and labels
+
+    > Folder :  K6 Alerts
+    
+    > Labels
+      severity :  critical
+      team :  devops
+
+●  4. Set evaluation behavior
+
+     >  Evaluation group and interval  :  UserJourneyAlerts
+     
+     > Pending period >  1m
+     
+     > Keep firing for :  0s
+
+
+● 5. Configure notifications
+
+   >  Contact point    :    OnCall: DevOps Team
+
+
+●  6. Configure notification message
+
+     >  Summary (optional)
+     Login success rate dropped below 900% in the last minute
+     
+     >  Description (optional)
+     The average rate of the "login successful" check fell below 90% during the last 1 minute window.
+     This could indicate issues with /api/token or /api/data endpoints.
+```
+
+```bash
+●   1. Enter alert rule name
+      >   Name :  ✅ Login Back to Normal
+      >   grafanacloud-maiabdelfatah077-prom
+
+●  2. Define query and alert condition
+        >  avg by(scenario, team) (
+       avg_over_time(k6_checks_rate{check="login successful"}[1m])
+     )
+
+         >   Is above     : 0.9
+
+●  3. Add folder and labels
+
+    > Folder :  K6 Alerts
+    
+    > Labels
+      severity :  critical
+      team :  devops
+
+●  4. Set evaluation behavior
+
+     >  Evaluation group and interval  :  UserJourneyAlerts
+     
+     > Pending period >  1m
+     
+     > Keep firing for :  0s
+
+
+● 5. Configure notifications
+
+   >  Contact point    :    OnCall: DevOps Team
+
+
+●  6. Configure notification message
+
+     >  Summary (optional)
+     ✅ Login success rate is back to normal above 90%
+     
+     >  Description (optional)
+     Login success rate has recovered and is now consistently above 90%. This means the /api/token and /api/data endpoints are functioning correctly again.
+```
+![image](https://github.com/user-attachments/assets/89e8d710-e5a7-4cb1-8b9c-8d66648b9d7a)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```bash
 quers :
 (1 - k6_http_req_failed_rate) * 100
