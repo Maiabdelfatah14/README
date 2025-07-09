@@ -1134,12 +1134,68 @@ maiabdelfatah077@gmail.com
 ![image](https://github.com/user-attachments/assets/89e8d710-e5a7-4cb1-8b9c-8d66648b9d7a)
 
 
+## 2- to send mail in team Devops in first and if not answered send to team SRE:
+### nfs steps ely foa bs
+```bash
+###  add team SRE
+   >>> add members 
+```
+```bash
+1- Contact Point
+    >>>  OnCall: DevOps Team  ( arbto b el alerts )
+          -   Integration   >> Grafana IRM  Recommended
+          -   IRM Integration  >>  devops-alerts-integration
 
 
+2-  Add Integration
+      >>>   devops-alerts-integration
+           -   Alerts matched by    (team = devops)
+           -  Trigger escalation chain    >> DevOps to SRE Escalation DevOps Team    ( da ana 3mlto gded mmkn a3ml bl adem 3ady )
+
+3-  Escalation chains
+        >>>  DevOps to SRE Escalation  mrbota b ( DevOps Team ) 3shan hwa el first team
+            - Start  Default   notification for   DevOps Team   team members
+            -  Wait  60   minute(s)    ( 1h ) 
+            -   Start  Default  notification for   SRE    team members
+```
+```bash
+- keda hyb3t l team Devops w lw m7dsh rd then 1h hyb3t l team SRE
+- emta el alert mytb3tsh l SRE :
+     1-  manual >  ay 7ad mn team devops y3ml el alert ( Acknowledged )
+     2-  lw el alert at7l w ba ( Resolved ) 
+```
+
+### to enable microsoft teams :
+```bash
+users >>  notification rules  >>   Notify by   Microsoft Teams
 
 
+    1- Contact Point   ( Teams - SRE Channel )
+              -   Integration   >> Microsoft Teams
+              -  URL    ( 7t el url )
 
+   2-  Contact Point بـ Alert Rules
+           -  in alert >  Contact Point   ( Teams - SRE Channel )
+    AW 
+      Contact Point بـ Notification Policies
+           -  Matching labels  ( team = devops )
+           - Contact point  >> Teams - SRE Channel
+```
+### to add Schedules
+ ```bash
+  1-  create new  Schedules  ( test )
+  2- add Layer
+      -  time Starts  and end
+      -  Recurrence period   ( kam yom )
+      - Mask by weekdays   ( lw 3mlt enable >> lw 3ayza ashel yom aw keda )
+      -   Limit each shift length   ( lw 3mlt enable >>  b7dd el shift kam sa3a ) 
+      -  users
+  >>>   Request shift swap  ( lw 3ayza abdel shift m3 shift 7ad tany mo'kat )
+  >>>   Add override    ( abdel m3 7ad 2 days msln lw f holiday ) 
 
+ 3-  Escalation chains
+     -  Start   Default   notification for schedule   Select Schedule
+```
 
 
 
