@@ -1334,6 +1334,11 @@ type: kubernetes.io/service-account-token
 
 
 
+> kubectl apply -f grafana-oncall-integration-sa.yaml
+> kubectl apply -f grafana-oncall-integration-token.yaml
+
+
+
 Step 3: Extract the Token from Kubernetes
 
      kubectl get secret grafana-oncall-integration-token -n default -o jsonpath="{.data.token}" | base64 -d
