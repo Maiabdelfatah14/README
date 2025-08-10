@@ -1672,6 +1672,17 @@ kubectl delete secret my-oncall-mariadb my-oncall-RabbitMQ
 ```
 ## files
 ```bash
+-- cat oncall-env.yaml    ( يعطل الأوثنتيكيشن (Authentication) )
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-oncall-env
+  namespace: default
+data:
+  ONCALL__AUTH__DISABLE_AUTH: "true"
+
+
  1- cat oncall-values.yaml
 
 replicaCount: 1
