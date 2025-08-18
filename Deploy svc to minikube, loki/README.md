@@ -96,7 +96,7 @@ Install Loki Stack
 ```bash
 helm show values grafana/loki-stack > loki-stack-values.yaml
 vim loki-stack-values.yaml
-(enable : true  , service / type: NodePort ) 
+(enable : true  , service / type: NodePort )   // ana 3mltha false 3shan 3mlt grafana-oncall
 helm install loki-stack grafana/loki-stack -f loki-stack-values.yaml 
 ```
 ![image](https://github.com/user-attachments/assets/61aba693-8e4b-473e-ad2b-6fb4f2d2f419)
