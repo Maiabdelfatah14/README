@@ -1088,6 +1088,7 @@ Delete RabbitMQ
 ```bash
 4. Create Pod - Redis  ( dont need username )   
 
+>> 3mlt login 3 leh f 8yrt mn clusterIP l NodePort
 Step 1: Install Redis
 
 helm upgrade --install my-redis bitnami/redis \
