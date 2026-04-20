@@ -111,6 +111,49 @@ Policy :
 }
 
 
+in keycloak : b3l create user w b7ot uel lambda 
+
+
+
+in lb: 
+create target-group : 
+    Registered target
+        Lambda function  :  ecs-logs-toggle
+ 
+create listner :  ( 3shan y login b keycloak )
+     
+        HTTPS:443
+        
+        Authenticate using OIDC
+        
+        Issuer: https://keycloak.qcingress-public.k8s.cequens.net/realms/master
+        Token endpoint: https://keycloak.qcingress-public.k8s.cequens.net/realms/master/protocol/openid-connect/token
+        User info endpoint: https://keycloak.qcingress-public.k8s.cequens.net/realms/master/protocol/openid-connect/userinfo
+        Authorization endpoint: https://keycloak.qcingress-public.k8s.cequens.net/realms/master/protocol/openid-connect/auth
+        Session cookie name: AWSELBAuthSessionCookie
+        On unauthenticated: authenticate
+        Scope: openid
+        Forward to target group
+        
+        ecs-dashboard-lambda : 1 (100%)
+        
+        Target group stickiness: Off
+        
+        1 rule
+        ARN
+        ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09
+        ecs-qc-dashboard.cequens.net (Certificate ID: ef9fdd04-87a3-49a9-a501-1417b2e6692c) 
+        Off
+        Not applicable
+        Not applicable
+        0 tags
+
+
+
+in route 53 :   ( 3shan a3ml domain )
+record-name : ecs-qc-dashboard.cequens.net
+type : CNAME
+value : LB-URL 
 
 ------------------------------------------------------------------------------
 # lambda_function.py
