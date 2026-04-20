@@ -1,16 +1,17 @@
+```bash
 ecs-logs-toggle/
 │
 ├── lambda_function.py
 └── templates/
     └── dashboard.html
+```
 
+## WEBHOOK_URL > add in env f lambda 
 
-# WEBHOOK_URL > add in env f lambda 
+## add in configration :
 
-# add in configration :
-
-
-Triggers 
+```bash 
+1- Triggers 
     
     Application Load Balancer: SMSDevelopInternalLoadBalancer
     arn:aws:elasticloadbalancing:eu-west-3:905418298875:targetgroup/ecs-dashboard-lambda/cd157f91d1e4b71a
@@ -21,10 +22,10 @@ Triggers
     Statement ID: AllowExecutionFromALB-ecs-dashboard-lambda
 
 
-    roles: 
+  roles: 
       > Role name  : ecs-logs-toggle-role-ja42rk9a 
-         1 > AmazonECS_FullAccess
-         2 > ECS   
+         a > AmazonECS_FullAccess
+         b > ECS   
     {
     "Version": "2012-10-17",
     "Statement": [
@@ -49,7 +50,7 @@ Triggers
 }
 
 
-        3 > AWSLambdaBasicExecutionRole-6366e9a0-853d-49a1-ba74-282dfd3488f3
+        c > AWSLambdaBasicExecutionRole-6366e9a0-853d-49a1-ba74-282dfd3488f3
 
            {
     "Version": "2012-10-17",
@@ -76,11 +77,11 @@ Triggers
 
 
 
-Resource summary :   AWS App Mesh   (5 actions, 1 resource )
+2- Resource summary :   AWS App Mesh   (5 actions, 1 resource )
 
 
 
-Policy :
+3- Policy :
 
            1- FunctionURLAllowPublicAccess
              {
@@ -109,18 +110,19 @@ Policy :
     "AWS:SourceArn": "arn:aws:elasticloadbalancing:eu-west-3:905418298875:targetgroup/ecs-dashboard-lambda/cd157f91d1e4b71a"
   }
 }
+```
+
+## in keycloak : b3l create user w b7ot url lambda 
 
 
-in keycloak : b3l create user w b7ot uel lambda 
 
-
-
-in lb: 
-create target-group : 
-    Registered target
-        Lambda function  :  ecs-logs-toggle
+## in lb: 
+```bash
+1- create target-group : 
+        Registered target
+            Lambda function  :  ecs-logs-toggle
  
-create listner :  ( 3shan y login b keycloak )
+2- create listner :  ( 3shan y login b keycloak )
      
         HTTPS:443
         
@@ -147,15 +149,17 @@ create listner :  ( 3shan y login b keycloak )
         Not applicable
         Not applicable
         0 tags
+```
 
 
-
-in route 53 :   ( 3shan a3ml domain )
+## in route 53 :   ( 3shan a3ml domain )
+```bash
 record-name : ecs-qc-dashboard.cequens.net
 type : CNAME
 value : LB-URL 
-
+```
 ------------------------------------------------------------------------------
+## files 
 ```bash
 # lambda_function.py
 import boto3
