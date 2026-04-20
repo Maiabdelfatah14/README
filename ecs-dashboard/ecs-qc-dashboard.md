@@ -8,7 +8,7 @@ ecs-logs-toggle/
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6b56cdf-8f36-47a3-bbb9-72da39650a4e" />
 
 
-## WEBHOOK_URL > add in env f lambda 
+## WEBHOOK_URL > add in env f lambda  ( 3shan tb3t notifcation 3l teams channel )
 
 ## add in configration :
 
