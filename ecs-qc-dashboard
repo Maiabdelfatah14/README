@@ -156,6 +156,7 @@ type : CNAME
 value : LB-URL 
 
 ------------------------------------------------------------------------------
+```bash
 # lambda_function.py
 import boto3
 import json
@@ -386,8 +387,9 @@ def lambda_handler(event, context):
             },
             "body":json.dumps(results)
         }
----------------------------------------------------------------------------------------------------------------
+```
 
+```bash
 <!-- templates/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
@@ -584,7 +586,4 @@ window.addEventListener('DOMContentLoaded', () => updateButtons());
 </script>
 </body>
 </html>
-
-
-
------------------
+```
